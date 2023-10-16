@@ -36,16 +36,19 @@ def belkin_plot_data(data, tags=[], ts_range=None):
 
     # Plot Real Power (W) and ON/OFF Device Category IDs
     axs[0].plot(times_l1, data['L1_Real'])
-    axs[0].plot(times_l2, data['L2_Real'], 'r')
+    axs[0].plot(times_l2, data['L2_Real'], 'c')
     axs[0].set_title('Real Power (W) and ON/OFF Device Category IDs')
     axs[0].grid(True)
 
     if tags and 'TaggingInfo' in data:
         for tag in data['TaggingInfo']:
             if tag[1] not in tags: continue
-            height = random.randrange(500, 1000)
+            height = random.randrange(500, 5000)
+
+            # device ON and OFF times
             on_time = datetime.fromtimestamp(tag[2])
             off_time = datetime.fromtimestamp(tag[3])
+            
             axs[0].axvline(x=on_time, color='g')
             axs[0].text(on_time, height, f"ON\n{tag[1]}", size='small')
             axs[0].axvline(x=off_time, color='r')
@@ -53,13 +56,13 @@ def belkin_plot_data(data, tags=[], ts_range=None):
 
     # Plot Imaginary/Reactive power (VAR)
     axs[1].plot(times_l1, data['L1_Imag'])
-    axs[1].plot(times_l2, data['L2_Imag'], 'r')
+    axs[1].plot(times_l2, data['L2_Imag'], 'c')
     axs[1].set_title('Imaginary/Reactive power (VAR)')
     axs[1].grid(True)
 
     # Plot Power Factor
     axs[2].plot(times_l1, data['L1_Pf'])
-    axs[2].plot(times_l2, data['L2_Pf'], 'r')
+    axs[2].plot(times_l2, data['L2_Pf'], 'c')
     axs[2].set_title('Power Factor')
     axs[2].grid(True)
 
