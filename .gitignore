@@ -1,2 +1,32 @@
+# Python
+*.pyc
+*.pyo
+*.egg-info
+*.egg
+*.venv
+*.virtualenv
 __pycache__/
 venv/
+env/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# Visual Studio Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# OS-specific
+.DS_Store
+._*
+*.swp
+*.swo
+*.swn
+Thumbs.db
+Desktop.ini
+
+# Other
+resources/
