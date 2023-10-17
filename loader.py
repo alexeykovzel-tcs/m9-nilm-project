@@ -19,6 +19,7 @@ test_files = [
     'Testing_07_16_1342422001.mat'
 ]
 
+
 def belkin_process_raw_data(buffer):
     result = {}
 
@@ -52,10 +53,25 @@ def belkin_process_raw_data(buffer):
 
     # Copy Labels/TaggingInfo if they exist
     if 'TaggingInfo' in buffer.dtype.names:
-        result['TaggingInfo'] = [[x[0][0] for x in y] for y in buffer['TaggingInfo'][0][0]]
+        tag_info = [[x[0][0] for x in y] for y in buffer['TaggingInfo'][0][0]]
+        tag_info = [[x[0], x[1][0], x[2], x[3]] for x in tag_info]
+        result['TaggingInfo'] = tag_info
 
     return result
+
 
 def load_h1(file):
     data = loadmat(h1_path + file)['Buffer']
     return belkin_process_raw_data(data)
+
+def load_train_file(idx):
+    return load_h1(train_files[idx])
+
+def load_test_file(idx):
+    return load_h1(test_files[idx])
+
+def load_train_files():
+    return [load_h1(f) for f in train_files]
+
+def load_test_files():
+    return [load_h1(f) for f in test_files]
