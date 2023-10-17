@@ -10,11 +10,6 @@ l2_keys = ['L2_TimeTicks', 'L2_Real', 'L2_App', 'L2_Imag', 'L2_Pf']
 hf_keys = ['HF_TimeTicks', 'HF']
 
 
-def to_datetimes(data, keys):
-    for key in keys:
-        data[key] = np.array([datetime.fromtimestamp(t) for t in data[key]])
-
-
 def closest_idx(arr, el):
     return min(range(len(arr)), key=lambda i: abs(arr[i]-el))
 
@@ -48,9 +43,9 @@ def plot_power_factor(ax, data):
 
 
 def plot_hf_noise(ax, data):
-    time_ticks = np.transpose(data['HF_TimeTicks'])
+    times = data['HF_TimeTicks']
     ax.imshow(np.transpose(data['HF']), aspect='auto', origin='lower',
-              extent=[time_ticks[0], time_ticks[-1], 0, 1e6])
+              extent=[times[0], times[-1], 0, 1e6])
 
     freqs = np.linspace(0, 1e6, 6)
     ax.set_yticks(freqs)
@@ -77,6 +72,11 @@ def add_device_tag(ax, tag, y_step):
     add_line(ax, f'OFF-{name}', tag[3], 'r', y_step + 0.1)
 
 
+def to_datetimes(data):
+    for key in ['L1_TimeTicks', 'L2_TimeTicks', 'HF_TimeTicks']:
+        data[key] = np.array([datetime.fromtimestamp(t) for t in data[key]])
+
+
 def plot_data(data, has_labels=False, ts_range=None):
     _, axs = plt.subplots(4, 1, figsize=(10, 8))
     data = copy.deepcopy(data)
@@ -87,9 +87,7 @@ def plot_data(data, has_labels=False, ts_range=None):
         trunc_range(data, ts_range, 'L2_TimeTicks', l2_keys)
         trunc_range(data, ts_range, 'HF_TimeTicks', hf_keys)
 
-    # Convert time ticks to the datetime format for better visualization
-    to_datetimes(data, ['L1_TimeTicks', 'L2_TimeTicks', 'HF_TimeTicks'])
-
+    to_datetimes(data)
     plot_real_power(axs[0], data)
     plot_reactive_power(axs[1], data)
     plot_power_factor(axs[2], data)

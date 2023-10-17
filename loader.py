@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.io import loadmat
 
-h1_path = '../resources/h1/'
+h1_path = 'resources/h1/'
 
 train_files = [
     'Tagged_Training_04_13_1334300401.mat',
@@ -18,6 +18,21 @@ test_files = [
     'Testing_07_12_1342076401.mat',
     'Testing_07_16_1342422001.mat'
 ]
+
+# L1_Real       - Real power (Phase 1)
+# L1_Image      - Reactive power (Phase 1)
+# L1_App        - Apparent power (Phase 1)
+# L1_Pf         - Power factor of 1/6 component (Phase 1)
+# L1_TimeTicks  - Time ticks (Phase 1)
+
+# L2_Real       - Real power (Phase 2)
+# L2_Image      - Reactive power (Phase 2)
+# L2_App        - Apparent power (Phase 2)
+# L2_Pf         - Power factor of 1/6 component (Phase 2)
+# L2_TimeTicks  - Time ticks (Phase 2)
+
+# HF            - 4096xN spectrogram of high frequency noise
+# HF_TimeTicks  - high frequency noise time ticks
 
 
 def belkin_process_raw_data(buffer):
