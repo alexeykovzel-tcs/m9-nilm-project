@@ -5,8 +5,7 @@ import numpy as np
 import copy
 
 
-l1_keys = ['L1_Datetimes', 'L1_TimeTicks', 'L1_Imag', 'L1_Real', 'L1_App', 'L1_Pf']
-l2_keys = ['L2_Datetimes', 'L2_TimeTicks', 'L2_Imag', 'L2_Real', 'L2_App', 'L2_Pf']
+l_keys = ['Datetimes', 'TimeTicks', 'Real', 'Reactive', 'Apparent', 'Pf']
 hf_keys = ['HF_Datetimes', 'HF_TimeTicks', 'HF']
 
 
@@ -43,7 +42,7 @@ def plot_real_power(data, ax=None, ts_range=None):
 
 
 def plot_reactive_power(data, ax=None, ts_range=None):
-    plot_l(data, ax, ts_range, 'Imag', 'Imaginary/Reactive power (VAR)')
+    plot_l(data, ax, ts_range, 'Reactive', 'Reactive power (VAR)')
 
 
 def plot_power_factor(data, ax=None, ts_range=None):
@@ -52,8 +51,7 @@ def plot_power_factor(data, ax=None, ts_range=None):
 
 def plot_l(data, ax, ts_range, field, title):
     data = prepare_plot(data, ax, ts_range)
-    ax.plot(data['L1_Datetimes'], data[f'L1_{field}'])
-    ax.plot(data['L2_Datetimes'], data[f'L2_{field}'], 'c')
+    ax.plot(data['Datetimes'], data[field], 'c')
     ax.set_title(title)
 
 
@@ -109,8 +107,7 @@ def add_line(ax, name, time, color, y_step):
 
 def trunc_data(data, ts_range):
     data = copy.deepcopy(data)
-    trunc_range(data, ts_range, 'L1_TimeTicks', l1_keys)
-    trunc_range(data, ts_range, 'L2_TimeTicks', l2_keys)
+    trunc_range(data, ts_range, 'TimeTicks', l_keys)
     trunc_range(data, ts_range, 'HF_TimeTicks', hf_keys)
     return data
 

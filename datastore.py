@@ -36,35 +36,33 @@ def process_raw_data(buffer):
     l1_p = buffer['LF1V'][0][0] * np.conj(buffer['LF1I'][0][0])
     l2_p = buffer['LF2V'][0][0] * np.conj(buffer['LF2I'][0][0])
 
-    # Compute net Complex power
+    # normalize data lengths
+    min_len = min(len(l1_p), len(l2_p))
+    l1_p = l1_p[:min_len]
+    l2_p = l2_p[:min_len]
+
+    # compute net complex power
     l1 = l1_p.sum(axis=1)
     l2 = l2_p.sum(axis=1)
 
-    # Real, Reactive, Apparent powers
-    result['L1_Real'] = np.real(l1)
-    result['L1_Imag'] = np.imag(l1)
-    result['L1_App'] = np.abs(l1)
+    # real, reactive, apparent powers
+    result['Real'] = np.real(l1) + np.real(l2)
+    result['Reactive'] = np.imag(l1) + np.imag(l2)
+    result['Apparent'] = np.abs(l1) + np.abs(l2)
 
-    result['L2_Real'] = np.real(l2)
-    result['L2_Imag'] = np.imag(l2)
-    result['L2_App'] = np.abs(l2)
+    # compute power factor, we only consider the first 60Hz component
+    result['Pf'] = np.cos(np.angle(l1_p[:, 0] + l2_p[:, 0]))
 
-    # Compute Power Factor, we only consider the first 60Hz component
-    result['L1_Pf'] = np.cos(np.angle(l1_p[:, 0]))
-    result['L2_Pf'] = np.cos(np.angle(l2_p[:, 0]))
+    # copy time ticks to our processed structure
+    result['TimeTicks'] = buffer['TimeTicks1'][0][0][:, 0]
+    result['Datetimes'] = to_datetimes(result['TimeTicks'])
 
-    # Copy Time ticks to our processed structure
-    result['L1_TimeTicks'] = buffer['TimeTicks1'][0][0][:, 0]
-    result['L2_TimeTicks'] = buffer['TimeTicks2'][0][0][:, 0]
-    result['L1_Datetimes'] = to_datetimes(result['L1_TimeTicks'])
-    result['L2_Datetimes'] = to_datetimes(result['L2_TimeTicks'])
-
-    # Move over HF Noise and Device label (tagging) data to our final structure as well
+    # move over HF Noise and Device label (tagging) data to our final structure as well
     result['HF'] = np.transpose(buffer['HF'][0][0])
     result['HF_TimeTicks'] = buffer['TimeTicksHF'][0][0][:, 0]
     result['HF_Datetimes'] = to_datetimes(result['HF_TimeTicks'])
 
-    # Copy Labels/TaggingInfo if they exist
+    # copy tagging info if exists
     if 'TaggingInfo' in buffer.dtype.names:
         tag_info = [[x[0][0] for x in y] for y in buffer['TaggingInfo'][0][0]]
         tag_info = [[x[0], x[1][0], x[2], x[3]] for x in tag_info]
