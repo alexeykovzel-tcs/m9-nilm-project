@@ -2,11 +2,8 @@ import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 from datetime import datetime
 import numpy as np
+import lph
 import copy
-
-
-l_keys = ['Datetimes', 'TimeTicks', 'Real', 'Reactive', 'Apparent', 'Pf']
-hf_keys = ['HF_Datetimes', 'HF_TimeTicks', 'HF']
 
 
 def plot_data(data, has_labels=False, time_range=None):
@@ -51,7 +48,7 @@ def plot_power_factor(data, ax=None, ts_range=None):
 
 def plot_l(data, ax, ts_range, field, title):
     data = prepare_plot(data, ax, ts_range)
-    ax.plot(data['Datetimes'], data[field], 'c')
+    ax.plot_hists(data['Datetimes'], data[field], 'c')
     ax.set_title(title)
 
 
@@ -107,8 +104,8 @@ def add_line(ax, name, time, color, y_step):
 
 def trunc_data(data, ts_range):
     data = copy.deepcopy(data)
-    trunc_range(data, ts_range, 'TimeTicks', l_keys)
-    trunc_range(data, ts_range, 'HF_TimeTicks', hf_keys)
+    trunc_range(data, ts_range, 'TimeTicks', ['Datetimes', 'TimeTicks', 'Real', 'Reactive', 'Apparent', 'Pf'])
+    trunc_range(data, ts_range, 'HF_TimeTicks', ['HF_Datetimes', 'HF_TimeTicks', 'HF'])
     return data
 
 

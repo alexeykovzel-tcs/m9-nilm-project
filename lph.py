@@ -6,20 +6,25 @@ import math
 lph_order = [(0, -1), (1, -1), (1, 0), (1, 1),
              (0, 1), (-1, 1), (-1, 0), (-1, -1)]
 
-dim_y = 100
 
+def plot_hists(titles, hists, cols=2):
+    rows = len(hists) // cols + 1
+    fig, axes = plt.subplots(rows, cols, figsize=(10, 4 * rows))
 
-def plot(samples):
-    l1_hist = histogram(samples)
-    plt.bar(np.arange(256), l1_hist)
+    for i, hist in enumerate(hists):
+        ax = axes[i // cols][i % cols]
+        ax.bar(np.arange(256), hist)
+        ax.set_title(titles[i])
+
+    plt.tight_layout()
     plt.show()
 
 
-def histogram(samples):
-    samples_2d = transform_2d(samples)
+def histogram(samples, dim_y):
+    samples_2d = transform_2d(samples, 20)
     vals = lph_vals(samples_2d)
     hist = np.bincount(vals, minlength=256)
-    return hist / hist.sum()
+    return hist
 
 
 def lph_vals(samples_2d):
@@ -39,7 +44,7 @@ def lph_val(samples_2d, row, col):
     return value
 
 
-def transform_2d(samples):
+def transform_2d(samples, dim_y):
     dim_x = len(samples) // dim_y
     return samples[:dim_x * dim_y].reshape(dim_x, dim_y)
 
