@@ -13,8 +13,3 @@ def _align_activities(signals: [Signal], event_data: [[int]]):
 # pair ON/OFF events as appliance activities
 def _find_activities(signal: Signal, events: [int]):
     return []
-
-
-# detects extreme changes in the signal (potentially appliance ON/OFF)
-def _detect_events(signal: Signal):
-    return []
