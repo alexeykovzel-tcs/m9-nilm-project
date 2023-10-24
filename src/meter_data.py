@@ -1,10 +1,10 @@
 from scipy.io import loadmat
-from src.signal.signal import *
+from src.signals import *
 import numpy as np
 import os
 
 
-resources_dir = 'resources/belkin'
+resources_dir = 'data'
 
 files = {
     'h1': [
@@ -25,7 +25,7 @@ files = {
 }
 
 
-class BelkinData:
+class MeterData:
     def __init__(self, l1: ComplexPower, l2: ComplexPower, hf: FreqNoise, tags):
         self.l1, self.l2, self.hf, self.tags = l1, l2, hf, tags
 
@@ -35,7 +35,7 @@ class BelkinData:
         return self.truncate(start, stop)
 
     def truncate(self, start=None, stop=None):
-        return BelkinData(
+        return MeterData(
             self.l1.truncate(start, stop),
             self.l2.truncate(start, stop),
             self.hf.truncate(start, stop),
@@ -43,7 +43,7 @@ class BelkinData:
         )
 
 
-def load_sample(file_idx=0, h_dir='h1') -> BelkinData:
+def load_sample(file_idx=0, h_dir='h1') -> MeterData:
     path = os.path.abspath(resources_dir)
     data = loadmat(f'{path}/{h_dir}/{files[h_dir][file_idx]}')
     return _process_raw_data(data)
@@ -73,4 +73,4 @@ def _process_raw_data(data):
         tags = [[x[0][0] for x in y] for y in buffer['TaggingInfo'][0][0]]
         tags = [[x[0], x[1][0], x[2], x[3]] for x in tags]
 
-    return BelkinData(l1, l2, hf, tags)
+    return MeterData(l1, l2, hf, tags)

@@ -1,10 +1,11 @@
-import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
+from src.meter_data import MeterData
 from datetime import datetime
+import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot(data, show_tags=True):
+def plot(data: MeterData, show_tags=True):
     _, axs = plt.subplots(4, 1, figsize=(10, 8))
 
     _plot_power(data, axs[0], lambda p: p.net().reactive(), 'Reactive power (VAR)')
@@ -20,7 +21,7 @@ def plot(data, show_tags=True):
     plt.show()
 
 
-def _plot_hf(data, ax):
+def _plot_hf(data: MeterData, ax):
     times = data.hf.format_times()
     ax.imshow(np.transpose(data.hf.vals),
               aspect='auto', origin='lower',
@@ -36,7 +37,7 @@ def _plot_hf(data, ax):
     ax.grid(True)
 
 
-def _plot_power(data, ax, consumer, title):
+def _plot_power(data: MeterData, ax, consumer, title):
     ax.plot(data.l1.format_times(), consumer(data.l1), 'c')
     ax.plot(data.l2.format_times(), consumer(data.l2))
 
@@ -45,7 +46,7 @@ def _plot_power(data, ax, consumer, title):
     ax.grid(True)
 
 
-def _add_device_tags(data, ax):
+def _add_device_tags(data: MeterData, ax):
     y_steps, y_idx = np.arange(0.2, 0.8, 0.2), 0
     for tag in data.tags:
         _add_device_tag(ax, tag, y_steps[y_idx])

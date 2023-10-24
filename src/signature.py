@@ -49,20 +49,20 @@ def plot_hists(titles, hists, cols=2):
 
 
 def histogram(samples, dim_y):
-    samples_2d = transform_2d(samples, dim_y)
-    vals = lph_vals(samples_2d)
+    samples_2d = _transform_2d(samples, dim_y)
+    vals = _lph_vals(samples_2d)
     hist = np.bincount(vals, minlength=256)
     return hist
 
 
-def lph_vals(samples_2d):
+def _lph_vals(samples_2d):
     dim_x, dim_y = samples_2d.shape
-    return [lph_cell(samples_2d, row, col)
+    return [_lph_cell(samples_2d, row, col)
             for row in range(1, dim_x - 2)
             for col in range(1, dim_y - 2)]
 
 
-def lph_cell(samples_2d, row, col):
+def _lph_cell(samples_2d, row, col):
     ctr_val = samples_2d[row][col]
     value = 0
     for n, (i, j) in enumerate(lph_order):
@@ -72,11 +72,11 @@ def lph_cell(samples_2d, row, col):
     return value
 
 
-def transform_2d(samples, dim_y):
+def _transform_2d(samples, dim_y):
     dim_x = len(samples) // dim_y
     return samples[:dim_x * dim_y].reshape(dim_x, dim_y)
 
 
-def transform_square(samples):
+def _transform_square(samples):
     dim = int(math.sqrt(len(samples)))
     return samples[:dim * dim].reshape(dim, dim)
