@@ -4,40 +4,27 @@ from datetime import datetime
 import numpy as np
 
 
-def plot_data(data, has_labels=False, start=None, stop=None):
+def plot(data, show_tags=False):
     _, axs = plt.subplots(4, 1, figsize=(10, 8))
 
-    if start is not None or stop is not None:
-        data = data.truncate(data, start, stop)
-
-    times = np.array([datetime.fromtimestamp(t) for t in data.times])
-
-    _plot_line(axs[0], times, data.real_power(), 'Real Power (W)')
-    _plot_line(axs[1], times, data.reactive_power(), 'Reactive power (VAR)')
-    _plot_line(axs[2], times, data.pf, 'Power Factor')
-    _plot_hf(axs[3], times, data.hf)
+    plot_real_power(data, axs[0])
+    plot_reactive_power(data, axs[1])
+    plot_power_factor(data, axs[2])
+    plot_hf(data, axs[3])
 
     for ax in axs:
-        if has_labels and data.tags is not None:
+        if show_tags and data.tags is not None:
             _add_device_tags(data, ax)
 
     plt.tight_layout(h_pad=2)
     plt.show()
 
 
-def plot_tagged_data(data, has_labels=True):
-    if data.tags is None:
-        print('there is no tagged belkin...')
-    else:
-        start = min(x[2] for x in data.tags)
-        stop = max(x[3] for x in data.tags)
-        plot_data(data, has_labels=has_labels, start=start, stop=stop)
+def plot_hf(data, ax=None):
+    ax = _prepare_plot(ax)
 
-
-def _plot_hf(ax, times, values):
-    _prepare_plot(ax)
-
-    ax.imshow(np.transpose(values),
+    times = data.hf.datetimes()
+    ax.imshow(np.transpose(data.hf.vals),
               aspect='auto', origin='lower',
               extent=[times[0], times[-1], 0, 1e6])
 
@@ -48,20 +35,27 @@ def _plot_hf(ax, times, values):
     ax.set_ylabel('Frequency KHz')
 
 
-def _plot_line(ax, times, values, title):
-    _prepare_plot(ax)
-    ax.plot(times, values, 'c')
+def plot_real_power(data, ax=None):
+    _plot_power(data, ax, lambda p: p.net().real(), 'Real Power (W)')
+
+
+def plot_reactive_power(data, ax=None):
+    _plot_power(data, ax, lambda p: p.net().reactive(), 'Reactive power (VAR)')
+
+
+def plot_power_factor(data, ax=None):
+    _plot_power(data, ax, lambda p: p.factor(), 'Power factor')
+
+
+def _plot_power(data, ax, consumer, title):
+    ax = _prepare_plot(ax)
+    ax.plot(data.l1.datetimes(), consumer(data.l1), 'c')
+    ax.plot(data.l2.datetimes(), consumer(data.l2))
     ax.set_title(title)
 
 
-def _prepare_plot(ax):
-    ax.xaxis.set_major_formatter(DateFormatter("%H:%M"))
-    ax.grid(True)
-
-
 def _add_device_tags(data, ax):
-    y_steps = np.arange(0.2, 0.8, 0.2)
-    y_idx = 0
+    y_steps, y_idx = np.arange(0.2, 0.8, 0.2), 0
     for tag in data.tags:
         _add_device_tag(ax, tag, y_steps[y_idx])
         y_idx = (y_idx + 1) % len(y_steps)
@@ -80,3 +74,11 @@ def _add_line(ax, name, time, color, y_step):
     text_y = (ylims[1] - ylims[0]) * y_step + ylims[0]
     ax.axvline(x=line_x, color=color, linestyle='--')
     ax.text(text_x, text_y, name, fontsize='xx-small')
+
+
+def _prepare_plot(ax):
+    if ax is None:
+        _, ax = plt.subplots(figsize=(10, 4))
+    ax.xaxis.set_major_formatter(DateFormatter("%H:%M"))
+    ax.grid(True)
+    return ax
