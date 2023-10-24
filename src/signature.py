@@ -1,4 +1,4 @@
-from signals import Signal
+from src.signals import Signal
 import numpy as np
 import math
 

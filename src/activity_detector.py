@@ -1,4 +1,4 @@
-from signals import Signal
+from src.signals import Signal
 
 
 def detect_activities(signals: [Signal]):

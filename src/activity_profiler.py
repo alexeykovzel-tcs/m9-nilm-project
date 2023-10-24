@@ -1,4 +1,4 @@
-from meter_data import MeterData
+from src.meter_data import MeterData
 
 
 # returns [(tag, ApplianceProfile)]
