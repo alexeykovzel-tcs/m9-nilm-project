@@ -1,5 +1,5 @@
 from scipy.io import loadmat
-from src.signals import *
+from src.signal.signal import *
 import numpy as np
 import os
 

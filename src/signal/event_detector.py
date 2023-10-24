@@ -1,4 +1,4 @@
-from signals import Signal
+from signal import Signal
 
 
 class EventDetector:

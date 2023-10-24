@@ -1,12 +1,13 @@
-import numpy as np
 from datetime import datetime
+import numpy as np
+import copy
 
 
 class Signal:
     def __init__(self, vals, times):
         self.vals, self.times = vals, times
 
-    def datetimes(self):
+    def format_times(self):
         return [datetime.fromtimestamp(t) for t in self.times]
 
     def truncate(self, start=None, stop=None):
@@ -19,6 +20,12 @@ class Signal:
     def time_idx(self, time):
         return min(range(len(self.times)),
                    key=lambda i: abs(self.times[i] - time))
+
+    def len(self):
+        return self.times[-1] - self.times[0]
+
+    def copy(self):
+        return copy.deepcopy(self)
 
 
 class Power(Signal):
@@ -34,9 +41,6 @@ class Power(Signal):
     def apparent(self):
         return np.abs(self.vals)
 
-    def copy(self):
-        return Power(self.vals.copy(), self.times.copy())
-
 
 class ComplexPower(Signal):
     def __init__(self, vals, times):
@@ -48,9 +52,6 @@ class ComplexPower(Signal):
     def factor(self):
         return np.cos(np.angle(self.vals[:, 0]))
 
-    def copy(self):
-        return ComplexPower(self.vals.copy(), self.times.copy())
-
 
 class FreqNoise(Signal):
     def __init__(self, vals, times):
@@ -59,6 +60,3 @@ class FreqNoise(Signal):
     def avg(self) -> Signal:
         vals = [np.average(val) for val in self.vals]
         return Signal(vals, self.times)
-
-    def copy(self):
-        return FreqNoise(self.vals.copy(), self.times.copy())
