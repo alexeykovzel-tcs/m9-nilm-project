@@ -7,12 +7,16 @@ class Signal:
         self.vals, self.times = vals, times
 
     def __add__(self, other):
+        if len(self.vals) != len(self.vals):
+            raise Exception('signal lengths should be equal')
+
         return self.__class__(self.vals + other.vals, self.times)
 
     def format_times(self):
         return [datetime.fromtimestamp(t) for t in self.times]
 
-    def truncate(self, start=None, stop=None):
+    def truncate(self, cycle):
+        start, stop = cycle
         i1 = self.time_idx(start) if (start is not None) else 0
         i2 = self.time_idx(stop) if (stop is not None) else len(self.times) - 1
         return self.__class__(self.vals[i1:i2], self.times[i1:i2])
@@ -30,9 +34,6 @@ class Signal:
             result.append(self.vals[i])
 
         return self.__class__(np.array(result), times)
-
-    def len(self):
-        return self.times[-1] - self.times[0]
 
 
 class Power(Signal):

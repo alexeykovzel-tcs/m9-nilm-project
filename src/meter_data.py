@@ -9,7 +9,7 @@ data_dir = os.path.abspath('data')
 train_files = {}
 test_files = {}
 
-for h in ['h1', 'h2', 'h3', 'h4']:
+for h in ['h1']:
     files = os.listdir(f'{data_dir}/{h}')
     train_files[h] = [f for f in files if f.startswith('Tagged')]
     test_files[h] = [f for f in files if f.startswith('Testing')]
@@ -27,20 +27,20 @@ class MeterData:
         stop = max(x[3] for x in self.tags)
         return self.truncate(start, stop)
 
-    def truncate(self, start=None, stop=None):
+    def truncate(self, cycle=None):
         return MeterData(
-            self.l1.truncate(start, stop),
-            self.l2.truncate(start, stop),
-            self.hf.truncate(start, stop),
+            self.l1.truncate(cycle),
+            self.l2.truncate(cycle),
+            self.hf.truncate(cycle),
             self.tags
         )
 
 
-def load_train(h_dir, idx):
+def load_train(h_dir, idx) -> MeterData:
     return load(h_dir, train_files[h_dir][idx])
 
 
-def load_test(h_dir, idx):
+def load_test(h_dir, idx) -> MeterData:
     return load(h_dir, test_files[h_dir][idx])
 
 
@@ -49,7 +49,7 @@ def load(h_dir, name) -> MeterData:
     return _process_raw_data(data)
 
 
-def _process_raw_data(data):
+def _process_raw_data(data) -> MeterData:
     buffer = data['Buffer']
 
     # 1st phase power

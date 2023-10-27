@@ -1,5 +1,16 @@
-from src.signals import Power, FreqNoise
+from src.signals import Signal
 
 
-def detect_cycles(power: Power, fn: FreqNoise):
-    return [(10, 100), (150, 300)]
+def detect_cycles(signal: Signal):
+    # e.g. [(1, 3), (4, 6)]
+    return []
+
+
+def _group_events(events: [int]):
+    # e.g. [[1, 2, 3], [4, 5, 6]]
+    return []
+
+
+def _detect_events(signal: Signal):
+    # e.g. [1, 2, 3, 4, 5, 6]
+    return []
