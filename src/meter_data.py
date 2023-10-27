@@ -1,33 +1,26 @@
-from scipy.io import loadmat
 from src.signals import *
+from scipy.io import loadmat
 import numpy as np
 import os
 
 
-resources_dir = 'data'
+data_dir = os.path.abspath('data')
 
-files = {
-    'h1': [
-        'Tagged_Training_04_13_1334300401.mat',
-        'Tagged_Training_10_22_1350889201.mat',
-        'Tagged_Training_10_23_1350975601.mat',
-        'Tagged_Training_10_24_1351062001.mat',
-        'Tagged_Training_10_25_1351148401.mat',
-        'Tagged_Training_12_27_1356595201.mat',
-        'Testing_07_09_1341817201.mat',
-        'Testing_07_11_1341990001.mat',
-        'Testing_07_12_1342076401.mat',
-        'Testing_07_16_1342422001.mat'
-    ],
-    'h2': [],
-    'h3': [],
-    'h4': []
-}
+train_files = {}
+test_files = {}
+
+for h in ['h1', 'h2', 'h3', 'h4']:
+    files = os.listdir(f'{data_dir}/{h}')
+    train_files[h] = [f for f in files if f.startswith('Tagged')]
+    test_files[h] = [f for f in files if f.startswith('Testing')]
 
 
 class MeterData:
-    def __init__(self, l1: ComplexPower, l2: ComplexPower, hf: FreqNoise, tags):
+    def __init__(self, l1: Power, l2: Power, hf: FreqNoise, tags):
         self.l1, self.l2, self.hf, self.tags = l1, l2, hf, tags
+
+    def total_power(self):
+        return self.l1 + self.l2
 
     def tagged(self):
         start = min(x[2] for x in self.tags)
@@ -43,9 +36,16 @@ class MeterData:
         )
 
 
-def load_sample(file_idx=0, h_dir='h1') -> MeterData:
-    path = os.path.abspath(resources_dir)
-    data = loadmat(f'{path}/{h_dir}/{files[h_dir][file_idx]}')
+def load_train(h_dir, idx):
+    return load(h_dir, train_files[h_dir][idx])
+
+
+def load_test(h_dir, idx):
+    return load(h_dir, test_files[h_dir][idx])
+
+
+def load(h_dir, name) -> MeterData:
+    data = loadmat(f'{data_dir}/{h_dir}/{name}')
     return _process_raw_data(data)
 
 
@@ -55,12 +55,18 @@ def _process_raw_data(data):
     # 1st phase power
     l1_vals = buffer['LF1V'][0][0] * np.conj(buffer['LF1I'][0][0])
     l1_times = buffer['TimeTicks1'][0][0][:, 0]
-    l1 = ComplexPower(l1_vals, l1_times)
+    l1 = Power(l1_vals, l1_times)
 
     # 2nd phase power
     l2_vals = buffer['LF2V'][0][0] * np.conj(buffer['LF2I'][0][0])
     l2_times = buffer['TimeTicks2'][0][0][:, 0]
-    l2 = ComplexPower(l2_vals, l2_times)
+    l2 = Power(l2_vals, l2_times)
+
+    # align L1 & L2 times
+    if len(l1.vals) < len(l2.vals):
+        l1 = l1.align_times(l2.times)
+    else:
+        l2 = l2.align_times(l1.times)
 
     # high-frequency noise
     hf_vals = np.transpose(buffer['HF'][0][0])

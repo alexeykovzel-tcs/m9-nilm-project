@@ -1,5 +1,5 @@
-from matplotlib.dates import DateFormatter
 from src.meter_data import MeterData
+from matplotlib.dates import DateFormatter
 from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,8 +8,8 @@ import numpy as np
 def plot(data: MeterData, show_tags=True):
     _, axs = plt.subplots(4, 1, figsize=(10, 8))
 
-    _plot_power(data, axs[0], lambda p: p.net().reactive(), 'Reactive power (VAR)')
-    _plot_power(data, axs[1], lambda p: p.net().real(), 'Real Power (W)')
+    _plot_power(data, axs[0], lambda p: p.real(), 'Real Power (W)')
+    _plot_power(data, axs[1], lambda p: p.reactive(), 'Reactive power (VAR)')
     _plot_power(data, axs[2], lambda p: p.factor(), 'Power factor')
     _plot_hf(data, axs[3])
 
