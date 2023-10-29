@@ -23,8 +23,7 @@ class Signal:
         return self.__class__(self.vals[i1:i2], self.times[i1:i2])
 
     def time_idx(self, time):
-        return min(range(len(self.times)),
-                   key=lambda i: abs(self.times[i] - time))
+        return min(range(len(self.times)), key=lambda i: abs(self.times[i] - time))
 
     def align_times(self, times):
         result = []
@@ -58,12 +57,12 @@ class Power(Signal):
         return np.abs(self.net)
 
     def features(self):
-        return np.concatenate(
+        return np.concatenate([
             stats(self.real()),
             stats(self.reactive()),
-            stats(self.factor())
-            [self.vals.len()]
-        )
+            stats(self.factor()),
+            [self.len()]
+        ])
 
 
 class FreqNoise(Signal):

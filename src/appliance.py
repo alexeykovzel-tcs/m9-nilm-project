@@ -6,12 +6,13 @@ class Appliance:
         self.idx, self.label, self.cycles = idx, label, []
 
     def features(self):
-        return np.mean([cycle.features for cycle in self.cycles], axis=0)
+        return np.mean([cycle.features() for cycle in self.cycles], axis=0)
 
     def base_power(self, length, cycle):
         result = np.zeros(length)
 
-        for i in range(cycle[0], cycle[1]):
-            result[i] = 20
+        # TODO: Implement this.
+        # for i in range(cycle[0], cycle[1]):
+        #     result[i] = 20
 
         return result

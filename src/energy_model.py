@@ -1,5 +1,5 @@
 from src.meter_data import MeterData
-from src.event_detector import detect_cycles
+from src.cycle_detector import detect_cycles
 from src.appliance import Appliance
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
@@ -22,7 +22,7 @@ class EnergyModel:
 
         times, powers, labels = result
         plt.figure(figsize=(10, 4))
-        plt.stackplot(times, powers, labels, alpha=0.6)
+        plt.stackplot(times, powers, labels=labels, alpha=0.6)
         plt.legend(loc='upper left')
         plt.xlabel('Time')
         plt.ylabel('Energy Consumption (Wh)')
@@ -38,7 +38,7 @@ class EnergyModel:
         # assign appliances to power cycles
         appliance_cycles = self.detect_appliance_cycles(data)
         if not appliance_cycles:
-            print('no cycles detected :/')
+            print('no cycles detected.')
             return None
 
         powers = [appliance.base_power(len(times), cycle) for cycle, appliance in appliance_cycles]
@@ -51,13 +51,15 @@ class EnergyModel:
         return times, powers, labels
 
     def detect_appliance_cycles(self, data: MeterData):
+        appliances = list(self.appliances.values())
+
         # detect cycles for each power phase
-        cycles = [power.truncate(cycle) for power in data.powers for cycle in detect_cycles(power)]
-        if not cycles: return None
+        power_cycles = [(cycle, power) for power in data.powers for cycle in detect_cycles(power)]
+        if not power_cycles: return None
 
         # extract cycle & appliance features
-        cycle_features = [cycle.features() for cycle in cycles]
-        appliance_features = [appliance.features() for appliance in self.appliances.values()]
+        cycle_features = [power.truncate(cycle).features() for cycle, power in power_cycles]
+        appliance_features = [appliance.features() for appliance in appliances]
 
         # normalize extracted features
         scaler = StandardScaler()
@@ -67,7 +69,7 @@ class EnergyModel:
 
         # guess an appliance for each detected cycle
         guesses = [_similar_ints_idx(f, appliance_features) for f in cycle_features]
-        return [(cycle, self.appliances[idx]) for cycle, (idx, ci) in zip(cycles, guesses) if ci > 0.2]
+        return [(cycle, appliances[idx]) for (cycle, _), (idx, ci) in zip(power_cycles, guesses) if ci > 0.2]
 
 
 def _similar_ints_idx(f: [int], vs: [[int]]):

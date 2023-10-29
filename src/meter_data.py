@@ -1,5 +1,5 @@
 from src.signals import *
-from src.event_detector import detect_cycles
+from src.cycle_detector import detect_cycles
 from matplotlib.dates import DateFormatter
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
@@ -19,7 +19,7 @@ class Tag:
         """
         all_cycles = [(power, cycle) for power in powers for cycle in detect_cycles(power)]
         if not all_cycles: return None
-        power, cycle = max(all_cycles, key=lambda _, c: self.overlap_score(c))
+        power, cycle = max(all_cycles, key=lambda x: self.overlap_score(x[1]))
         return power.truncate(cycle)
 
     def overlap_score(self, cycle):
