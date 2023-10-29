@@ -1,15 +1,17 @@
 import numpy as np
-from src.meter_data import MeterData
 
 
 class Appliance:
-    def __init__(self, idx, label, features):
-        self.idx, self.label, self.features = idx, label, features
+    def __init__(self, idx, label):
+        self.idx, self.label, self.cycles = idx, label, []
 
-    def base_power(self, cycle, times):
-        # TODO: Implement this.
-        return np.zeros(len(times))
+    def features(self):
+        return np.mean([cycle.features for cycle in self.cycles], axis=0)
 
-    def match(self, data: MeterData, cycle):
-        # TODO: Implement this.
-        return 0.2
+    def base_power(self, length, cycle):
+        result = np.zeros(length)
+
+        for i in range(cycle[0], cycle[1]):
+            result[i] = 20
+
+        return result

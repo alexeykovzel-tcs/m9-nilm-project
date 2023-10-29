@@ -1,6 +1,8 @@
 from src.signals import Signal
 
 
+# TODO: Implement this.
+
 def detect_cycles(signal: Signal):
     # e.g. [(1, 3), (4, 6)]
     return []

@@ -1,4 +1,5 @@
 from datetime import datetime
+from src.feature_extractor import stats
 import numpy as np
 
 
@@ -35,6 +36,9 @@ class Signal:
 
         return self.__class__(np.array(result), times)
 
+    def len(self):
+        return self.times[-1] - self.times[0]
+
 
 class Power(Signal):
     def __init__(self, vals, times):
@@ -52,6 +56,14 @@ class Power(Signal):
 
     def apparent(self):
         return np.abs(self.net)
+
+    def features(self):
+        return np.concatenate(
+            stats(self.real()),
+            stats(self.reactive()),
+            stats(self.factor())
+            [self.vals.len()]
+        )
 
 
 class FreqNoise(Signal):
