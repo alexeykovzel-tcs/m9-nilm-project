@@ -1,9 +1,17 @@
 from src.meter_data import MeterData
-from src.cycle_detector import detect_cycles
-from src.appliance import Appliance
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
+from collections import defaultdict
 import matplotlib.pyplot as plt
+import numpy as np
+
+
+class Appliance:
+    def __init__(self, idx, label):
+        self.idx, self.label, self.cycles = idx, label, []
+
+    def features(self):
+        return np.mean([cycle.features() for cycle in self.cycles], axis=0)
 
 
 class EnergyModel:
@@ -31,45 +39,71 @@ class EnergyModel:
         plt.tight_layout()
         plt.show()
 
-    # TODO: Handle when power < 0 at some timestamps.
     def disaggregate(self, data: MeterData):
         times = data.total_power.times
 
         # assign appliances to power cycles
-        appliance_cycles = self.detect_appliance_cycles(data)
-        if not appliance_cycles:
+        guesses = self._guess_appliances(data)
+        if not guesses:
             print('no cycles detected.')
             return None
 
-        powers = [appliance.base_power(len(times), cycle) for cycle, appliance in appliance_cycles]
-        labels = [appliance.label for _, appliance in appliance_cycles]
+        powers = [_base_power(times, cycles) for appliance, cycles in guesses.items()]
+        labels = [appliance.label for appliance in guesses.keys()]
 
         # handle remaining power
-        powers.append(data.total_power.real() - sum(powers))
+        other = data.total_power.real() - sum(powers)
+        powers.append(other)
         labels.append('Other')
+
+        # handle when power < 0 at some timestamps
+        for i, val in enumerate(other):
+            if val < 0:
+                diff = val / len(powers)
+                for power in powers:
+                    power[i] -= diff
+                other[i] = 0
 
         return times, powers, labels
 
-    def detect_appliance_cycles(self, data: MeterData):
+    def _guess_appliances(self, data: MeterData):
+        if not data.cycles: return None
         appliances = list(self.appliances.values())
 
-        # detect cycles for each power phase
-        power_cycles = [(cycle, power) for power in data.powers for cycle in detect_cycles(power)]
-        if not power_cycles: return None
-
         # extract cycle & appliance features
-        cycle_features = [power.truncate(cycle).features() for cycle, power in power_cycles]
-        appliance_features = [appliance.features() for appliance in appliances]
+        f_cycles = [power.truncate(cycle).features() for power, cycle in data.cycles]
+        f_appliances = [appliance.features() for appliance in appliances]
 
         # normalize extracted features
         scaler = StandardScaler()
-        scaler.fit_transform(cycle_features + appliance_features)
-        appliance_features = scaler.transform(appliance_features)
-        cycle_features = scaler.transform(cycle_features)
+        scaler.fit_transform(f_cycles + f_appliances)
+        f_cycles = scaler.transform(f_cycles)
+        f_appliances = scaler.transform(f_appliances)
 
-        # guess an appliance for each detected cycle
-        guesses = [_similar_ints_idx(f, appliance_features) for f in cycle_features]
-        return [(cycle, appliances[idx]) for (cycle, _), (idx, ci) in zip(power_cycles, guesses) if ci > 0.2]
+        # guess appliances per cycle (ignore if CI < 0.2)
+        guesses = [(cycle, _similar_ints_idx(f, f_appliances)) for cycle, f in zip(data.cycles, f_cycles)]
+        guesses = [(cycle, appliances[idx]) for cycle, (idx, ci) in guesses if ci >= 0.2]
+
+        # group guesses with the same appliance
+        grouped_guesses = defaultdict(list)
+        for cycle, appliance in guesses:
+            grouped_guesses[appliance].append(cycle)
+
+        return grouped_guesses
+
+
+def _base_power(times, power_cycles):
+    result = np.zeros(len(times))
+
+    for power, cycle in power_cycles:
+        times_idx = np.where(times == cycle[0])[0][0]
+        power_idx = np.where(power.times == cycle[0])[0][0]
+
+        power_len = len(power.times)
+        result[times_idx:times_idx + power_len] \
+            = power.real()[power_idx:power_idx + power_len]
+
+    return result
 
 
 def _similar_ints_idx(f: [int], vs: [[int]]):

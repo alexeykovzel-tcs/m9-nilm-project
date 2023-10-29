@@ -3,6 +3,14 @@ from src.feature_extractor import stats
 import numpy as np
 
 
+"""
+
+This file contains the Signal class, and classes that extend it. 
+Signal is just 2 arrays with equal lengths: values and timestamps.
+
+"""
+
+
 class Signal:
     def __init__(self, vals, times):
         self.vals, self.times = vals, times

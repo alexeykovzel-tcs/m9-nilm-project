@@ -16,8 +16,7 @@ def detect_cycles(signal: Power, eps=100, k=1, min_time=30):
 def _group(signal: Power, eps, k):
     x_reactive = _extract_trues(signal, 'reactive', k)
     x_real = _extract_trues(signal, 'real', k)
-    x_apparent = _extract_trues(signal, 'apparent', k)
-    x = np.concatenate((x_reactive.times, x_real.times, x_apparent.times))
+    x = np.concatenate((x_reactive.times, x_real.times))
     x = np.array(x).reshape(-1, 1)
 
     model = DBSCAN(eps=eps)
@@ -54,10 +53,8 @@ def _extract_trues(signal: Power, power, k):
         data_signal = signal.reactive()
     elif power == 'real':
         data_signal = signal.real()
-    elif power == 'apparent':
-        data_signal = signal.apparent()
     else:
-        raise Exception("Available power types: 'reactive', 'real', 'apparent'.")
+        raise Exception("Available power types: 'reactive', 'real'.")
 
     threshold = _find_threshold(data_signal, k)
 
