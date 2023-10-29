@@ -53,16 +53,14 @@ class EnergyModel:
 
         # handle remaining power
         other = data.total_power.real() - sum(powers)
-        powers.append(other)
-        labels.append('Other')
+        powers = [other] + powers
+        labels = ['Other'] + labels
 
         # handle when power < 0 at some timestamps
         for i, val in enumerate(other):
             if val < 0:
-                diff = val / len(powers)
-                for power in powers:
-                    power[i] -= diff
                 other[i] = 0
+                # TODO: Update powers.
 
         return times, powers, labels
 
@@ -80,9 +78,9 @@ class EnergyModel:
         f_cycles = scaler.transform(f_cycles)
         f_appliances = scaler.transform(f_appliances)
 
-        # guess appliances per cycle (ignore if CI < 0.2)
+        # guess appliances per cycle (ignore if low CI)
         guesses = [(cycle, _similar_ints_idx(f, f_appliances)) for cycle, f in zip(data.cycles, f_cycles)]
-        guesses = [(cycle, appliances[idx]) for cycle, (idx, ci) in guesses if ci >= 0.2]
+        guesses = [(cycle, appliances[idx]) for cycle, (idx, ci) in guesses if ci >= 0.0]
 
         # group guesses with the same appliance
         grouped_guesses = defaultdict(list)
@@ -96,12 +94,13 @@ def _base_power(times, power_cycles):
     result = np.zeros(len(times))
 
     for power, cycle in power_cycles:
-        times_idx = np.where(times == cycle[0])[0][0]
-        power_idx = np.where(power.times == cycle[0])[0][0]
+        times_start = np.where(times == cycle[0])[0][0]
+        power_start = np.where(power.times == cycle[0])[0][0]
+        power_stop = np.where(power.times == cycle[1])[0][0]
 
-        power_len = len(power.times)
-        result[times_idx:times_idx + power_len] \
-            = power.real()[power_idx:power_idx + power_len]
+        power_len = power_stop - power_start
+        result[times_start:times_start + power_len] \
+            = power.real()[power_start:power_start + power_len]
 
     return result
 

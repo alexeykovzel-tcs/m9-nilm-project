@@ -23,6 +23,10 @@ for h in os.listdir(data_dir):
     test_files[h] = [f for f in files if f.startswith('Testing')]
 
 
+def load_all_train(h_dir) -> [MeterData]:
+    return [load(h_dir, f) for f in train_files[h_dir]]
+
+
 def load_train(h_dir, idx) -> MeterData:
     """ loads a train file by index """
     return load(h_dir, train_files[h_dir][idx])

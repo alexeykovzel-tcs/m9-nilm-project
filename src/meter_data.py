@@ -51,7 +51,7 @@ class MeterData:
     def __init__(self, l1: Power, l2: Power, hf: FreqNoise, tags: [Tag]):
         self.l1, self.l2, self.total_power = l1, l2, l1 + l2
         self.hf, self.tags = hf, tags
-        self.cycles = [(power, cycle) for power in [l1, l2] for cycle in detect_cycles(power, k=2)]
+        self.cycles = [(power, cycle) for power in [l1, l2] for cycle in detect_cycles(power)]
 
     def tagged_cycles(self):
         adjusted_tags = [tag.adjust_times() for tag in self.tags]
