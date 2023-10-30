@@ -17,8 +17,8 @@ class ApplianceGuesser:
         features = power_features(power)
         features = self.feature_scaler.transform([features])
 
-        appliance, ci = self._guess_appliance(features)
-        appliance = appliance if ci > 0 else self.appliance_unknown
+        appliance, dist = self._guess_appliance(features)
+        appliance = appliance if dist < 0.8 else self.appliance_unknown
 
         return appliance
 
@@ -36,8 +36,13 @@ class ApplianceGuesser:
             (appliance, self._euclidean_dist(features, appliance_features))
             for appliance, appliance_features in self.feature_data
         ]
-        return max(guesses, key=lambda x: x[1])
+        return min(guesses, key=lambda x: x[1])
 
     @staticmethod
     def _euclidean_dist(a, b):
-        return np.sqrt(np.sum((a - b) ** 2))
+        distance = np.linalg.norm(a - b)
+
+        norm_a = np.linalg.norm(a)
+        norm_b = np.linalg.norm(b)
+
+        return distance / (norm_a + norm_b)

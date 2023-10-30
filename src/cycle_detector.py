@@ -3,7 +3,7 @@ from src.signals import *
 from sklearn.cluster import DBSCAN
 
 
-def detect_cycles(signal: Power, eps=100, k=1, min_time=30):
+def detect_cycles(signal: Power, eps=30, k=1, min_time=30):
     clusters = _group(signal, eps, k)
     bounds = clusters.boundaries()
     bounds = sorted(bounds, key=lambda x: x[0])
