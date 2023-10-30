@@ -1,5 +1,4 @@
 from datetime import datetime
-from src.feature_extractor import stats
 import numpy as np
 
 
@@ -22,6 +21,7 @@ class Signal:
         return self.__class__(self.vals + other.vals, self.times)
 
     def format_times(self):
+        """ converts the Unix times to python datetimes. (used for plotting) """
         return [datetime.fromtimestamp(t) for t in self.times]
 
     def truncate(self, cycle):
@@ -31,6 +31,7 @@ class Signal:
         return self.__class__(self.vals[i1:i2], self.times[i1:i2])
 
     def time_idx(self, time):
+        """ finds the index in 'times' which value is similar to the given 'time' """
         return min(range(len(self.times)), key=lambda i: abs(self.times[i] - time))
 
     def align_times(self, times):
@@ -63,14 +64,6 @@ class Power(Signal):
 
     def apparent(self):
         return np.abs(self.net)
-
-    def features(self):
-        return np.concatenate([
-            stats(self.real()),
-            stats(self.reactive()),
-            stats(self.factor()),
-            [self.len()]
-        ])
 
 
 class FreqNoise(Signal):

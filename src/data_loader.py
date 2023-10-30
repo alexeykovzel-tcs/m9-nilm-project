@@ -12,24 +12,24 @@ This file is for loading and processing the raw data into the MeterData class.
 
 """
 
-train_files = {}
+tagged_files = {}
 test_files = {}
 
 data_dir = os.path.abspath('data')
 
 for h in os.listdir(data_dir):
     files = os.listdir(f'{data_dir}/{h}')
-    train_files[h] = [f for f in files if f.startswith('Tagged')]
-    test_files[h] = [f for f in files if f.startswith('Testing')]
+    tagged_files[h] = sorted([f for f in files if f.startswith('Tagged')])
+    test_files[h] = sorted([f for f in files if f.startswith('Testing')])
 
 
-def load_all_train(h_dir) -> [MeterData]:
-    return [load(h_dir, f) for f in train_files[h_dir]]
+def load_all_tagged(h_dir) -> [MeterData]:
+    return [load(h_dir, f) for f in tagged_files[h_dir]]
 
 
-def load_train(h_dir, idx) -> MeterData:
+def load_tagged(h_dir, idx) -> MeterData:
     """ loads a train file by index """
-    return load(h_dir, train_files[h_dir][idx])
+    return load(h_dir, tagged_files[h_dir][idx])
 
 
 def load_test(h_dir, idx) -> MeterData:

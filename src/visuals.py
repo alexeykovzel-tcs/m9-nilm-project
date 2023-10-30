@@ -1,18 +1,37 @@
 from src.meter_data import MeterData
 from matplotlib.dates import DateFormatter
 from datetime import datetime
+from src.signals import Signal
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-"""
+def plot_disaggr_pie(powers, labels):
+    sizes = [sum(power) for power in powers]
+    plt.pie(sizes, labels=labels)
+    plt.show()
 
-This file is intended for plotting the meter data.
-(real power, reactive power, power factor and high frequency noise)
 
-If show_tags is true, then ON and OFF labels of appliances are also added.
+def plot_disaggr_stack(times, powers, labels):
+    fig, ax = plt.subplots(figsize=(10, 4))
 
-"""
+    ax.stackplot(times, powers, labels=labels, alpha=0.6)
+    ax.legend(loc='upper left')
+    ax.xaxis.set_major_formatter(DateFormatter("%H:%M"))
+    ax.grid(True)
+
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Energy Consumption (Wh)')
+    ax.set_title('Energy Disaggregation')
+
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_signal(signal: Signal):
+    plt.plot(signal.format_times(), signal.vals)
+    plt.figure(figsize=(12, 3))
+    plt.show()
 
 
 def plot(data: MeterData, show_tags=True):

@@ -2,16 +2,13 @@ from src.meter_data import MeterData
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
 from collections import defaultdict
-import matplotlib.pyplot as plt
+from src.feature_extractor import power_features, appliance_features
 import numpy as np
 
 
 class Appliance:
     def __init__(self, idx, label):
         self.idx, self.label, self.cycles = idx, label, []
-
-    def features(self):
-        return np.mean([cycle.features() for cycle in self.cycles], axis=0)
 
 
 class EnergyModel:
@@ -24,31 +21,14 @@ class EnergyModel:
                 appliance = self.appliances.setdefault(tag.idx, Appliance(tag.idx, tag.label))
                 appliance.cycles.append(cycle)
 
-    def disaggregate_and_plot(self, data: MeterData):
-        result = self.disaggregate(data)
-        if not result: return None
-
-        times, powers, labels = result
-        plt.figure(figsize=(10, 4))
-        plt.stackplot(times, powers, labels=labels, alpha=0.6)
-        plt.legend(loc='upper left')
-        plt.xlabel('Time')
-        plt.ylabel('Energy Consumption (Wh)')
-        plt.title('Energy Disaggregation')
-        plt.grid(True)
-        plt.tight_layout()
-        plt.show()
-
     def disaggregate(self, data: MeterData):
-        times = data.total_power.times
-
         # assign appliances to power cycles
         guesses = self._guess_appliances(data)
         if not guesses:
             print('no cycles detected.')
             return None
 
-        powers = [_base_power(times, cycles) for appliance, cycles in guesses.items()]
+        powers = [_base_power(data.total_power.times, cycles) for appliance, cycles in guesses.items()]
         labels = [appliance.label for appliance in guesses.keys()]
 
         # handle remaining power
@@ -62,15 +42,15 @@ class EnergyModel:
                 other[i] = 0
                 # TODO: Update powers.
 
-        return times, powers, labels
+        return data.total_power.format_times(), powers, labels
 
     def _guess_appliances(self, data: MeterData):
         if not data.cycles: return None
         appliances = list(self.appliances.values())
 
         # extract cycle & appliance features
-        f_cycles = [power.truncate(cycle).features() for power, cycle in data.cycles]
-        f_appliances = [appliance.features() for appliance in appliances]
+        f_cycles = [power_features(power.truncate(cycle)) for power, cycle in data.cycles]
+        f_appliances = [appliance_features(appliance.cycles) for appliance in appliances]
 
         # normalize extracted features
         scaler = StandardScaler()
@@ -80,7 +60,7 @@ class EnergyModel:
 
         # guess appliances per cycle (ignore if low CI)
         guesses = [(cycle, _similar_ints_idx(f, f_appliances)) for cycle, f in zip(data.cycles, f_cycles)]
-        guesses = [(cycle, appliances[idx]) for cycle, (idx, ci) in guesses if ci >= 0.0]
+        guesses = [(cycle, appliances[idx]) for cycle, (idx, ci) in guesses if ci >= -1]  # TODO: Change CI limit.
 
         # group guesses with the same appliance
         grouped_guesses = defaultdict(list)

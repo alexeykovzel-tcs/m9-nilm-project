@@ -1,5 +1,3 @@
-import numpy as np
-
 from src.cluster_storage import ClusteredData
 from src.signals import *
 from sklearn.cluster import DBSCAN
