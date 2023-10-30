@@ -6,16 +6,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_disaggr_pie(powers, labels):
+def plot_powers_pie(powers, labels):
     sizes = [sum(power) for power in powers]
     plt.pie(sizes, labels=labels)
     plt.show()
 
 
-def plot_disaggr_stack(times, powers, labels):
+def plot_powers_stack(times, powers, labels):
+    formatted_times = [datetime.fromtimestamp(time) for time in times]
     fig, ax = plt.subplots(figsize=(10, 4))
 
-    ax.stackplot(times, powers, labels=labels, alpha=0.6)
+    ax.stackplot(formatted_times, powers, labels=labels, alpha=0.6)
     ax.legend(loc='upper left')
     ax.xaxis.set_major_formatter(DateFormatter("%H:%M"))
     ax.grid(True)
@@ -35,12 +36,12 @@ def plot_signal(signal: Signal):
 
 
 def plot(data: MeterData, show_tags=True):
-    _, axs = plt.subplots(4, 1, figsize=(10, 8))
+    _, axs = plt.subplots(3, 1, figsize=(10, 8))
 
     _plot_power(data, axs[0], lambda p: p.real(), 'Real Power (W)')
     _plot_power(data, axs[1], lambda p: p.reactive(), 'Reactive power (VAR)')
     _plot_power(data, axs[2], lambda p: p.factor(), 'Power factor')
-    _plot_hf(data, axs[3])
+    # _plot_hf(data, axs[3])
 
     for ax in axs:
         if show_tags and data.tags is not None:

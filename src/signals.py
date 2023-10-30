@@ -44,6 +44,9 @@ class Signal:
 
         return self.__class__(np.array(result), times)
 
+    def time_bounds(self):
+        return self.times[0], self.times[-1]
+
     def len(self):
         return self.times[-1] - self.times[0]
 
