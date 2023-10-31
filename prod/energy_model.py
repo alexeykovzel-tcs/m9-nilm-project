@@ -1,6 +1,6 @@
-from src.appliance_guesser import ApplianceGuesser
-from src.meter_data import MeterData
-from src.appliance import Appliance
+from prod.appliance_guesser import ApplianceGuesser
+from prod.meter_data import MeterData
+from prod.appliance import Appliance
 from collections import defaultdict
 
 
@@ -16,7 +16,7 @@ class EnergyModel:
         labels = [appliance.label for appliance in guesses.keys()]
         powers = [appliance.base_power(times, powers) for appliance, powers in guesses.items()]
 
-        other_power = data.total_power.real() - sum(powers)
+        other_power = data.total_power.real().vals - sum(powers)
         powers = [other_power] + powers
         labels = ['Other'] + labels
 

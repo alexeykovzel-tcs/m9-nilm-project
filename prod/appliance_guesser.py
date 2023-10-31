@@ -1,6 +1,6 @@
-from src.feature_extractor import power_features
-from src.appliance import Appliance
-from src.signals import Power
+from prod.feature_extractor import power_features
+from prod.appliance import Appliance
+from prod.signals import Power
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
@@ -9,8 +9,8 @@ class ApplianceGuesser:
     def __init__(self, appliances: [Appliance]):
         self.appliances = appliances
         self.appliance_unknown = Appliance(-1, 'Unknown')
+        self.appliance_features = []
         self.feature_scaler = StandardScaler()
-        self.feature_data = []  # (appliance, features)
         self._update_features()
 
     def guess_by_power(self, power: Power):
@@ -26,15 +26,15 @@ class ApplianceGuesser:
         feature_table = [appliance.features() for appliance in self.appliances]
         feature_table = self.feature_scaler.fit_transform(feature_table)
 
-        self.feature_data = [
+        self.appliance_features = [
             (appliance, features)
             for appliance, features in zip(self.appliances, feature_table)
         ]
 
     def _guess_appliance(self, features):
         guesses = [
-            (appliance, self._euclidean_dist(features, appliance_features))
-            for appliance, appliance_features in self.feature_data
+            (appliance, self._euclidean_dist(features, f))
+            for appliance, f in self.appliance_features
         ]
         return min(guesses, key=lambda x: x[1])
 

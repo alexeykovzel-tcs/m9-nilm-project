@@ -1,7 +1,7 @@
-from src.meter_data import MeterData
+from prod.meter_data import MeterData
 from matplotlib.dates import DateFormatter
 from datetime import datetime
-from src.signals import Signal
+from prod.signals import Signal
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -12,7 +12,7 @@ def plot_powers_pie(powers, labels):
     plt.show()
 
 
-def plot_powers_stack(times, powers, labels):
+def plot_powers_stack(times, powers, labels, smooth=False):
     formatted_times = [datetime.fromtimestamp(time) for time in times]
     fig, ax = plt.subplots(figsize=(10, 4))
 
@@ -30,17 +30,17 @@ def plot_powers_stack(times, powers, labels):
 
 
 def plot_signal(signal: Signal):
-    plt.plot(signal.format_times(), signal.vals)
     plt.figure(figsize=(12, 3))
+    plt.plot(signal.format_times(), signal.vals)
     plt.show()
 
 
 def plot(data: MeterData, show_tags=True):
     _, axs = plt.subplots(3, 1, figsize=(10, 8))
 
-    _plot_power(data, axs[0], lambda p: p.real(), 'Real Power (W)')
-    _plot_power(data, axs[1], lambda p: p.reactive(), 'Reactive power (VAR)')
-    _plot_power(data, axs[2], lambda p: p.factor(), 'Power factor')
+    _plot_power(data, axs[0], lambda p: p.real().vals, 'Real Power (W)')
+    _plot_power(data, axs[1], lambda p: p.reactive().vals, 'Reactive power (VAR)')
+    _plot_power(data, axs[2], lambda p: p.factor().vals, 'Power factor')
     # _plot_hf(data, axs[3])
 
     for ax in axs:

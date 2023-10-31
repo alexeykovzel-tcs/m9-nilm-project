@@ -13,16 +13,14 @@ Signal is just 2 arrays with equal lengths: values and timestamps.
 class Signal:
     def __init__(self, vals, times):
         self.vals, self.times = vals, times
+        self.duration = self.times[-1] - self.times[0]
+        self.range = (self.times[0], self.times[-1])
 
     def __add__(self, other):
         if len(self.vals) != len(self.vals):
             raise Exception('signal lengths should be equal')
 
         return self.__class__(self.vals + other.vals, self.times)
-
-    def format_times(self):
-        """ converts the Unix times to python datetimes. (used for plotting) """
-        return [datetime.fromtimestamp(t) for t in self.times]
 
     def truncate(self, cycle):
         start, stop = cycle
@@ -34,6 +32,10 @@ class Signal:
         """ finds the index in 'times' which value is similar to the given 'time' """
         return min(range(len(self.times)), key=lambda i: abs(self.times[i] - time))
 
+    def format_times(self):
+        """ converts the Unix times to python datetimes. (used for plotting) """
+        return [datetime.fromtimestamp(t) for t in self.times]
+
     def align_times(self, times):
         result = []
         i, max_i = 0, len(self.vals) - 1
@@ -44,12 +46,6 @@ class Signal:
 
         return self.__class__(np.array(result), times)
 
-    def time_bounds(self):
-        return self.times[0], self.times[-1]
-
-    def len(self):
-        return self.times[-1] - self.times[0]
-
 
 class Power(Signal):
     def __init__(self, vals, times):
@@ -57,16 +53,17 @@ class Power(Signal):
         self.net = vals.sum(axis=1)
 
     def factor(self, axis=0):
-        return np.cos(np.angle(self.vals[:, axis]))
+        vals = np.cos(np.angle(self.vals[:, axis]))
+        return Signal(vals, self.times)
 
     def real(self):
-        return np.real(self.net)
+        return Signal(np.real(self.net), self.times)
 
     def reactive(self):
-        return np.imag(self.net)
+        return Signal(np.imag(self.net), self.times)
 
     def apparent(self):
-        return np.abs(self.net)
+        return Signal(np.abs(self.net), self.times)
 
 
 class FreqNoise(Signal):

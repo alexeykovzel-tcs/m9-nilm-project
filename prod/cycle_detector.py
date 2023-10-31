@@ -1,5 +1,5 @@
-from src.cluster_storage import ClusteredData
-from src.signals import *
+from prod.cluster_storage import ClusteredData
+from prod.signals import *
 from sklearn.cluster import DBSCAN
 
 
@@ -48,9 +48,9 @@ def _extract_trues(signal: Power, power, k):
     t_times = []
 
     if power == 'reactive':
-        data_signal = signal.reactive()
+        data_signal = signal.reactive().vals
     elif power == 'real':
-        data_signal = signal.real()
+        data_signal = signal.real().vals
     else:
         raise Exception("Available power types: 'reactive', 'real'.")
 

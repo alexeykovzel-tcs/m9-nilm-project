@@ -1,5 +1,5 @@
-from src.signals import *
-from src.meter_data import MeterData, Tag
+from prod.signals import *
+from prod.meter_data import MeterData, Tag
 from scipy.io import loadmat
 import numpy as np
 import os

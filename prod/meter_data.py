@@ -1,5 +1,5 @@
-from src.signals import *
-from src.cycle_detector import detect_cycles
+from prod.signals import *
+from prod.cycle_detector import detect_cycles
 
 
 """
@@ -42,6 +42,7 @@ class MeterData:
         self.hf, self.tags = hf, tags
         self.l1, self.l2 = l1, l2
         self.total_power = l1 + l2
+
         self.power_cycles = [
             (power, cycle) for power in [l1, l2]
             for cycle in detect_cycles(power)
